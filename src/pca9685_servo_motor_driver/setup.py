@@ -13,13 +13,13 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='fs',
+    maintainer='Stanislav Olekhnovich',
     maintainer_email='stas.olekhnovich@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [
+        'console_scripts': ['pca9685_servo_motor_driver = pca9685_servo_motor_driver.pca9685_servo_motor_driver:main'
         ],
     },
 )
