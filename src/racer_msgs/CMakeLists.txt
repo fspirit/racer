@@ -31,8 +31,8 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package()
-
-set(msg_files “msgs/actuators.msg”) 
+set(msg_files msgs/Actuators.msg) 
 rosidl_generate_interfaces( ${PROJECT_NAME} ${msg_files} DEPENDENCIES builtin_interfaces)
 ament_export_dependencies(rosidl_default_runtime)
+
+ament_package()
