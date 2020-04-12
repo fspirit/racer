@@ -1,20 +1,8 @@
 import rclpy
 
 from rclpy.node import Node
-from rclpy.timer import Timer
 from racer_msgs.msg import Actuators
 from racer_msgs.msg import RecordingStatus
-
-from jetcam.csi_camera import CSICamera
-
-class Factory():
-
-    def create_timer(self, callback, timer_period_ns):
-        return Timer(callback = callback, timer_period_ns=timer_period_ns)
-
-    def create_camera(self, width, height, capture_width, capture_height, capture_fps):
-        return CSICamera(width=width, height=height, capture_width=capture_width, capture_height=capture_height, capture_fps=capture_fps)
-
 
 class IdleState():    
 
@@ -29,10 +17,13 @@ class IdleState():
 
 class RecordingState():
 
+    DEFAULT_FPS = 30
+
     def __init__(self, factory, settings):
         self.recording_started_ = False
         self.factory_ = factory
-        self.fps_ = settings['camera_fps']
+
+        self.fps_ = settings['camera_fps'] if ('camera_fps' in settings) else self.DEFAULT_FPS
 
     def handle_actuators(self, actuators):        
         self.last_actuators_ = actuators
@@ -73,8 +64,7 @@ class ILDatasetRecorder(Node):
     def __init__(self, factory, settings = {}):
         super().__init__('il_dataset_recorder')
 
-        self.states_ = {'idle': IdleState(), 
-            'recording': RecordingStatus(factory, settings)}
+        self.states_ = {'idle': IdleState(), 'recording': RecordingState(factory, settings)}
         self.current_state_ = self.states_['idle']       
 
         self.actuators_subscription = self.create_subscription(
@@ -94,19 +84,3 @@ class ILDatasetRecorder(Node):
 
     def handle_recording_command(self, recording_status):
         self.current_state_ =  self.state_.next_state(recording_status, self.states_)
-
-def main(args=None):
-    rclpy.init(args=args)
-
-    factory = Factory()
-    settings = {'camera_fps': 2}
-
-    il_dataset_recorder = ILDatasetRecorder(factory, settings)
-
-    rclpy.spin(il_dataset_recorder)
-
-    il_dataset_recorder.destroy_node()
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
