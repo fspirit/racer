@@ -9,7 +9,7 @@ from il_dataset_recorder import ILDatasetRecorder
 
 class TestILDatasetRecorder(unittest.TestCase):
 
-    def test_when_not_recoring_then_no_camera_or_timer_are_create(self):
+    def test_when_not_recoring_then_no_camera_or_timer_are_created(self):
         factory = Mock()
         settings = {}
 
