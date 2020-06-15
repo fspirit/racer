@@ -1,6 +1,6 @@
 import rclpy
 import sys, os
-sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../il_dataset_recorder'))
+sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/../dataset_recorder/il_dataset_recorder'))
 
 import unittest
 from unittest.mock import Mock
