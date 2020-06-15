@@ -4,7 +4,7 @@ from rclpy.node import Node
 from adafruit_servokit import ServoKit
 from racer_msgs.msg import Actuators
 
-class ServoPca9685Driver(Node):
+class ServoDriver(Node):
 
     # Physical connection setup
     i2c_address = 0x40
@@ -12,7 +12,7 @@ class ServoPca9685Driver(Node):
     throttle_channel = 1
 
     def __init__(self):
-        super().__init__('servo_pca9685_driver')
+        super().__init__('servo_driver')
 
         self.kit = ServoKit(channels=16, address=self.i2c_address)
 
@@ -51,7 +51,7 @@ class ServoPca9685Driver(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    servo_driver = ServoPca9685Driver()
+    servo_driver = ServoDriver()
 
     rclpy.spin(servo_driver)
 
