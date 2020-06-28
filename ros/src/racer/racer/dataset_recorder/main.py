@@ -3,7 +3,7 @@ from rclpy.timer import Timer
 
 from jetcam.csi_camera import CSICamera
 
-from il_dataset_recorder.il_dataset_recorder import ILDatasetRecorder
+from il_dataset_recorder import ILDatasetRecorder
 
 class Factory():
 
