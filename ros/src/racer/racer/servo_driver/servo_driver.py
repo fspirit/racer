@@ -1,8 +1,6 @@
-import rclpy
-
 from rclpy.node import Node
 from adafruit_servokit import ServoKit
-from racer_msgs.msg import Actuators
+from racer.msg import Actuators
 
 class ServoDriver(Node):
 
@@ -48,15 +46,3 @@ class ServoDriver(Node):
         self.steering_motor.throttle = self.convert_steering(msg.steering)
         self.throttle_motor.throttle = self.convert_throttle(msg.throttle)
 
-def main(args=None):
-    rclpy.init(args=args)
-
-    servo_driver = ServoDriver()
-
-    rclpy.spin(servo_driver)
-
-    servo_driver.destroy_node()
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
