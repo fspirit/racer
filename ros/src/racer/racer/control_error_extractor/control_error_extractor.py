@@ -1,16 +1,7 @@
-import rclpy
-import cv2
+from control_error_extraction_pipeline import CentralLineExtractionPipeline
 
 from rclpy.node import Node
-
-
-def crop(image_all_ch):
-    return image_all_ch
-
-def select_relevant_pixels(image_all_ch):
-    return image_all_ch    
-
-
+  
 class ControlErrorExtractor(Node):
 
     FPS = 30

@@ -2,25 +2,9 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-class MissingOperationInput(Exception):
-    def __init__(self, missing_parameter_key, op_name):
-        self.missing_parameter_key_ = missing_parameter_key
-        self.op_name_ = op_name
-
-class Operation:
-    def _check_input(self, input, keys):        
-        for key in keys:
-            if key not in input:
-                raise MissingOperationInput(key, self.__class__.__name__)        
-
-    def _run(self, input):
-        pass
-
-    def run(self, input, visualizer=None):
-        self._run(input)
-        if (visualizer):
-            visualizer.visualize(self.__class__.__name__, input)            
+from matplotlib_visualizer import MatplotlibVisualizer
+from operation import Operation   
+from find_lines_with_sliding_windows_op import FindLinesWithSlidingWindowsOp        
 
 class GetGrayscaleImageOp(Operation):
     def _run(self, input):
@@ -76,33 +60,37 @@ class FillGapsWithMorphologyOp(Operation):
         kernel = np.ones((self.kernel_size_,  self.kernel_size_), np.uint8)
         input['binary_image'] = cv2.morphologyEx(input['binary_image'].astype(np.uint8), cv2.MORPH_CLOSE, kernel)
 
-class MatplotlibVisualizer():
-    def __init__(self, original_bgr_image):
-        self.figure, self.subplots = plt.subplots(2, 3)  
+class ApplyBirdeyeTransformOp(Operation):
+    def __init__(self, top_to_bottom_ratio=0.35):
+        self.top_to_bottom_ratio_ = top_to_bottom_ratio  
 
-        self.subplots[0, 0].imshow(original_bgr_image)
-        self.subplots[0, 0].set_title('Original')      
+    def _run(self, input):
+        self._check_input(input, ['binary_image'])
+                
+        h, w = input['binary_image'].shape
+        top_offset = (1 - self.top_to_bottom_ratio_ ) * w / 2
 
-    # TODO: Add param values into Plot Title
-    def visualize(self, op_name, state):
-        if op_name == 'GetGrayscaleImageOp':
-            self.subplots[0, 1].imshow(state['binary_image'], cmap='gray')
-            self.subplots[0, 1].set_title('Grayscale')
-        if op_name == 'ApplyHistogramEqualizationOp':
-            self.subplots[0, 2].imshow(state['binary_image'], cmap='gray')
-            self.subplots[0, 2].set_title('Grayscale After Using Histogram Equalization')
-        if op_name == 'ApplyBinaryThresholdOp':
-            self.subplots[1, 0].imshow(state['binary_image'], cmap='gray')
-            self.subplots[1, 0].set_title('Grayscale After Threshold Appication')
-        if op_name == 'ApplySobelFilterOp':
-            self.subplots[1, 1].imshow(state['binary_image'], cmap='gray')
-            self.subplots[1, 1].set_title('Grayscale After Sobel Filter')
-        if op_name == 'FillGapsWithMorphologyOp':
-            self.subplots[1, 2].imshow(state['binary_image'], cmap='gray')
-            self.subplots[1, 2].set_title('Grayscale After Filling Gaps')        
-    
-    def show(self):
-        plt.show()
+        source_polygon = np.float32([[w, h], [0, h], [top_offset, 0], [w - top_offset, 0]])
+        target_polygon = np.float32([[w, h], [0, h], [0, 0], [w, 0]])
+
+        translation_matrix = cv2.getPerspectiveTransform(source_polygon, target_polygon)        
+
+        input['birdeye_binary_image'] = cv2.warpPerspective(input['binary_image'], 
+            translation_matrix, (w, h), flags=cv2.INTER_LINEAR)
+
+class CalculateCTEOp(Operation):
+    def _run(self, input):
+        self._check_input(input, ['left_line', 'right_line', 'birdeye_binary_image'])        
+
+        height, width = input['birdeye_binary_image'].shape
+        current_center_x = width / 2.0
+        left_x = input['left_line'].get_values([height])[0]
+        right_x = input['right_line'].get_values([height])[0]
+        target_center_x = (left_x + right_x) / 2.0
+
+        print(f"Extract CTE: {current_center_x}, {left_x}, {right_x}, {target_center_x}")
+        
+        input['cte_error'] = target_center_x - current_center_x
 
 class CentralLineExtractionPipeline:
 
@@ -113,18 +101,21 @@ class CentralLineExtractionPipeline:
         input = {'bgr_image': bgr_image}
         for op in self.ops_:
             op.run(input, visualizer)
-        # return input['cte_error']
+        return input['cte_error']
 
 # TODO: Make visualization dependent on pipeline contents, once smth is gone from pipeline I should not viz it
 if __name__ == '__main__':
-    bgr_image = cv2.imread('2_.png')
+    bgr_image = cv2.imread('2_.png')    
     visualizer = MatplotlibVisualizer(bgr_image)
     pipeline = CentralLineExtractionPipeline([
         CropImageOp(110, 160),
-        GetGrayscaleImageOp(), 
-        # ApplyHistogramEqualizationOp(), 
+        GetGrayscaleImageOp(),        
         ApplyBinaryThresholdOp(200),
         ApplySobelFilterOp(5, 50),
-        FillGapsWithMorphologyOp(5)])    
-    pipeline.run(bgr_image, visualizer)
+        FillGapsWithMorphologyOp(5),
+        ApplyBirdeyeTransformOp(),
+        FindLinesWithSlidingWindowsOp(),
+        CalculateCTEOp()])    
+    cte = pipeline.run(bgr_image, visualizer)
+    print(f"CTE ={cte}")
     visualizer.show()
