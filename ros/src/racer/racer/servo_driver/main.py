@@ -1,5 +1,8 @@
 from servo_driver import ServoDriver
+<<<<<<< HEAD
 from adafruit_servokit import ServoKit
+=======
+>>>>>>> a0f14b2... Fix import path
 import rclpy
 
 def main(args=None):
