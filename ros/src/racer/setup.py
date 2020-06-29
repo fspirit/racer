@@ -1,4 +1,6 @@
+import os
 from setuptools import setup
+from glob import glob
 
 package_name = 'racer'
 
@@ -10,6 +12,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        # Include all launch files.
+        (os.path.join('share', package_name, 'launch'), glob('*.launch.py'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -19,7 +23,8 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': ['servo_driver = racer.servo_driver.servo_driver:main'
+        'console_scripts': ['servo_driver = racer.servo_driver.main:main',
+            'control_error_extractor = racer.control_error_extractor.main:main'
         ],
     },
 )
