@@ -1,30 +1,25 @@
-from control_error_extraction_pipeline import CentralLineExtractionPipeline
+from racer.msg import ControlErrors
 
 from rclpy.node import Node
-  
-class ControlErrorExtractor(Node):
+—class ControlErrorExtractor(Node):
 
-    FPS = 30
+    DEFAULT_FPS = 30
 
-    def __init__(self, factory, settings = {}):
-        super().__init__('il_dataset_recorder')
-
+    def __init__(self, factory, pipeline, settings = {}):
+        super().__init__('control_error_extractor')
+        
+        self.fps_ = settings['camera_fps'] if ('camera_fps' in settings) else self.DEFAULT_FPS
         self.camera_ = factory.create_camera(width=224, height=224, capture_width=1080, capture_height=720, capture_fps=self.fps_)
-        self.timer_ = factory.create_timer(self.extract_control_errors, (1.0 / self.FPS * 1e9))
+        self.timer_ = factory.create_timer(self.extract_control_errors, (1.0 / self.fps_ * 1e9))
+        self.pipeline_ = pipeline        
+        self.publisher_ = self.create_publisher(String, 'ControlErrors', 10)
 
     def extract_control_errors(self):
         image = self.camera_.read()
-
-
-        # https://github.com/SlothFriend/CarND-Term1-P4
-        # 1 crop
-        # 2 filter by color/intencity
-        # 3 move into eagle view
-        # 4 sliding window centerline detectio
-        # 5 curve fitting
-        # 6 cte ans heading error calc
-
-        ## Open question: 
-        # send 
+        cte = self.pipeline_.run(image)
+        
+        msg = ControlErrors()
+        msg.data.cross_track_error = cte
+        self.publisher_.publish(msg)        
 
 

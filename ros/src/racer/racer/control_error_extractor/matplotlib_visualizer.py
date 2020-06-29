@@ -7,6 +7,7 @@ class MatplotlibVisualizer():
 
         self.subplots[0, 0].imshow(original_bgr_image)
         self.subplots[0, 0].set_title('Original')
+        
 
     def _plot_lines(self, state, subplot):
         birdeye_binary = state['birdeye_binary_image']

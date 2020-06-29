@@ -86,9 +86,7 @@ class CalculateCTEOp(Operation):
         current_center_x = width / 2.0
         left_x = input['left_line'].get_values([height])[0]
         right_x = input['right_line'].get_values([height])[0]
-        target_center_x = (left_x + right_x) / 2.0
-
-        print(f"Extract CTE: {current_center_x}, {left_x}, {right_x}, {target_center_x}")
+        target_center_x = (left_x + right_x) / 2.0        
         
         input['cte_error'] = target_center_x - current_center_x
 
