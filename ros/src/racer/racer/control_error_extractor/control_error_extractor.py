@@ -3,6 +3,7 @@ from rclpy.node import Node
 
 from sensor_msgs.msg import Image
 import numpy as np
+import utils
 
 class ControlErrorExtractor(Node):
 
@@ -25,7 +26,8 @@ class ControlErrorExtractor(Node):
         self.original_img_publisher_.publish(self.cv_bridge.cv2_to_imgmsg(bgr_image, "bgr8"))
 
     def publish_birdeye_image_with_lines(self, birdeye_binary_image, left_line, right_line):
-        pass
+        birdeye_bgr_image = utils.create_birdeye_image_with_lines(birdeye_binary_image, left_line, right_line)
+        self.final_birdeye_img_publisher_.publish(self.cv_bridge.cv2_to_imgmsg(birdeye_bgr_image, "bgr8"))
         
     def publish_cte(self, cte):
         msg = ControlErrors()
@@ -39,4 +41,5 @@ class ControlErrorExtractor(Node):
 
         cte, birdeye_binary_image, left_line, right_line = self.pipeline_.run(image)
 
+        self.publish_birdeye_image_with_lines(birdeye_binary_image, left_line, right_line)
         self.publish_cte(cte)
