@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.timer import Timer
 
+from cv_bridge import CvBridge
 from jetcam.csi_camera import CSICamera
 
 from control_error_extractor import ControlErrorExtractor
@@ -20,6 +21,8 @@ def main(args=None):
 
     factory = Factory()
     settings = {'camera_fps': 2}
+
+    cv_bridge = CvBridge()
     
     pipeline = CentralLineExtractionPipeline([
         CropImageOp(110, 160),
@@ -31,7 +34,7 @@ def main(args=None):
         FindLinesWithSlidingWindowsOp(),
         CalculateCTEOp()])  
 
-    cte_extractor = ControlErrorExtractor(factory, pipeline, settings)
+    cte_extractor = ControlErrorExtractor(factory, pipeline, cv_bridge, settings)
 
     rclpy.spin(cte_extractor)
 

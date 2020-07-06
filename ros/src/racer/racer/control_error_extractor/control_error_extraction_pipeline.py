@@ -99,7 +99,7 @@ class CentralLineExtractionPipeline:
         input = {'bgr_image': bgr_image}
         for op in self.ops_:
             op.run(input, visualizer)
-        return input['cte_error']
+        return input['cte_error'], input['birdeye_binary_image'], input['left_line'], input['right_line']
 
 # TODO: Make visualization dependent on pipeline contents, once smth is gone from pipeline I should not viz it
 if __name__ == '__main__':
@@ -114,6 +114,6 @@ if __name__ == '__main__':
         ApplyBirdeyeTransformOp(),
         FindLinesWithSlidingWindowsOp(),
         CalculateCTEOp()])    
-    cte = pipeline.run(bgr_image, visualizer)
+    cte,_,_,_ = pipeline.run(bgr_image, visualizer)
     print(f"CTE ={cte}")
     visualizer.show()
