@@ -1,6 +1,6 @@
 from rclpy.node import Node
 
-from racer.msg import Actuators
+from racer_msgs.msg import Actuators
 
 class ServoDriver(Node):
 
@@ -29,5 +29,5 @@ class ServoDriver(Node):
         return steering_value * self.steering_gain + self.steering_offset
 
     def handle_command(self, msg):
-        self.steering_motor.throttle = self.convert_steering(msg.steering)
-        self.throttle_motor.throttle = self.convert_throttle(msg.throttle)
+        self.steering_motor.throttle = self.convert_steering(msg.data.steering)
+        self.throttle_motor.throttle = self.convert_throttle(msg.data.throttle)

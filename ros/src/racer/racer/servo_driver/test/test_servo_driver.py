@@ -1,10 +1,11 @@
 import rclpy
 import sys, os
-sys.path.append("..")
+sys.path.append(os.path.join(sys.path[0], '..'))
 
 import unittest
 from unittest.mock import Mock
 from unittest.mock import MagicMock
+from unittest.mock import PropertyMock
 
 from servo_driver import ServoDriver
 
@@ -20,14 +21,13 @@ class TestServoDriver(unittest.TestCase):
         test_throttle_value = 0.5
 
         actuators = Mock()
-        actuators.data.steering.return_value = test_steering_value
-        actuators.data.throttle.return_value = test_throttle_value
+        actuators.data.steering = test_steering_value
+        actuators.data.throttle = test_throttle_value
 
         servo_driver.handle_command(actuators)
 
-        steering_motor.throttle.assert_called_once_with(servo_driver.steering_gain * test_steering_value +  servo_driver.steering_offset)
-        throttle_motor.throttle.assert_called_once_with(servo_driver.throttle_gain * test_throttle_value +  servo_driver.throttle_offset)
-
+        self.assertEqual(steering_motor.throttle, servo_driver.steering_gain * test_steering_value +  servo_driver.steering_offset)
+        self.assertEqual(throttle_motor.throttle, servo_driver.throttle_gain * test_throttle_value +  servo_driver.throttle_offset)
 
 if __name__ == '__main__':
     rclpy.init()
