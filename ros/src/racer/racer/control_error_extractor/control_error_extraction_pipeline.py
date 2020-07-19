@@ -101,9 +101,10 @@ class CentralLineExtractionPipeline:
             op.run(input, visualizer)
         return input['cte_error'], input['birdeye_binary_image'], input['left_line'], input['right_line']
 
-# TODO: Make visualization dependent on pipeline contents, once smth is gone from pipeline I should not viz it
 if __name__ == '__main__':
-    bgr_image = cv2.imread('2_.png')    
+    import os, sys
+    
+    bgr_image = cv2.imread(os.path.join(sys.path[0], 'test/sample.png'))
     visualizer = MatplotlibVisualizer(bgr_image)
     pipeline = CentralLineExtractionPipeline([
         CropImageOp(110, 160),

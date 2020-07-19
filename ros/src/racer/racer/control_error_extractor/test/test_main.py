@@ -1,20 +1,29 @@
 import rclpy
+import cv2
+import os, sys
 
-from jetcam.csi_camera import CSICamera
+sys.path.append(os.path.join(sys.path[0], '..'))
 
 from control_error_extractor import ControlErrorExtractor
-from control_error_extraction_pipeline import CentralLineExtractionPipeline
+from control_error_extraction_pipeline import *
 
-class Factory():
+from unittest.mock import Mock
+
+class TestFactory():
 
     def create_camera(self, width, height, capture_width, capture_height, capture_fps):
-        return CSICamera(width=width, height=height, capture_width=capture_width, capture_height=capture_height, capture_fps=capture_fps)
+        camera = Mock()
+        
+        bgr_image = cv2.imread(os.path.join(sys.path[0], 'sample.png'))
 
+        camera.read.return_value = bgr_image
+
+        return camera
 
 def main(args=None):
     rclpy.init(args=args)
 
-    factory = Factory()
+    factory = TestFactory()
     settings = {'camera_fps': 2}    
     
     pipeline = CentralLineExtractionPipeline([
