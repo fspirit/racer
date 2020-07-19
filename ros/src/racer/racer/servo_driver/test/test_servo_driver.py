@@ -4,8 +4,6 @@ sys.path.append(os.path.join(sys.path[0], '..'))
 
 import unittest
 from unittest.mock import Mock
-from unittest.mock import MagicMock
-from unittest.mock import PropertyMock
 
 from servo_driver import ServoDriver
 
